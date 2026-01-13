@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartDoc Assistant - Votre Assistant Santé</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- En-tête -->
+        <header class="header">
+            <h1>🏥 SmartDoc</h1>
+            <p class="subtitle">Votre assistant santé personnel</p>
+        </header>
+
+        <!-- Actions rapides -->
+        <section class="quick-actions">
+            <button class="action-btn medication" onclick="quickAction('medications')" title="Voir mes médicaments">
+                <span class="icon">💊</span>
+                <span class="label">Médicaments</span>
+            </button>
+            <button class="action-btn appointment" onclick="quickAction('appointments')" title="Mes rendez-vous">
+                <span class="icon">📅</span>
+                <span class="label">Rendez-vous</span>
+            </button>
+            <button class="action-btn symptom" onclick="quickAction('symptoms')" title="Décrire un symptôme">
+                <span class="icon">🌡️</span>
+                <span class="label">Symptômes</span>
+            </button>
+            <button class="action-btn help" onclick="quickAction('help')" title="Aide">
+                <span class="icon">❓</span>
+                <span class="label">Aide</span>
+            </button>
+        </section>
+
+        <!-- Zone de chat -->
+        <section class="chat-section">
+            <div class="chat-container" id="chatContainer">
+                <div class="message assistant-message welcome">
+                    <div class="message-icon">🤖</div>
+                    <div class="message-content">
+                        <p><strong>Bonjour!</strong></p>
+                        <p>Je suis SmartDoc, votre assistant santé personnel.</p>
+                        <p>Comment puis-je vous aider aujourd'hui? 😊</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Zone de saisie -->
+        <section class="input-section">
+            <div class="input-container">
+                <input
+                    type="text"
+                    id="userInput"
+                    class="message-input"
+                    placeholder="Tapez votre message ici..."
+                    onkeypress="handleKeyPress(event)"
+                    autocomplete="off"
+                >
+                <button class="send-btn" onclick="sendMessage()" title="Envoyer">
+                    <span class="send-icon">➤</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Bouton d'urgence -->
+        <section class="emergency-section">
+            <button class="emergency-btn" onclick="emergency()" title="Appuyer en cas d'urgence">
+                <span class="emergency-icon">🚨</span>
+                <span class="emergency-text">URGENCE</span>
+            </button>
+        </section>
+
+        <!-- Pied de page -->
+        <footer class="footer">
+            <p>SmartDoc Assistant - Propulsé par IA</p>
+            <p class="status" id="status">
+                <span class="status-dot"></span>
+                <span id="statusText">Prêt</span>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Modal de configuration -->
+    <div id="configModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeConfig()">&times;</span>
+            <h2>⚙️ Configuration</h2>
+            <div class="config-form">
+                <label for="apiUrlInput">URL de l'API:</label>
+                <input
+                    type="text"
+                    id="apiUrlInput"
+                    placeholder="https://your-api.execute-api.us-east-1.amazonaws.com"
+                >
+                <label for="userIdInput">ID Utilisateur:</label>
+                <input
+                    type="text"
+                    id="userIdInput"
+                    placeholder="user_marie_123"
+                >
+                <button onclick="saveConfig()" class="config-save-btn">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Icône de configuration -->
+    <button class="config-icon" onclick="openConfig()" title="Configuration">
+        ⚙️
+    </button>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: SmartDoc Assistant - Infrastructure complète avec LangGraph et agents IA
+
+Parameters:
+  AnthropicApiKey:
+    Type: String
+    NoEcho: true
+    Description: Clé API Anthropic Claude pour les agents IA
+
+  DeploymentBucket:
+    Type: String
+    Description: Nom du bucket S3 contenant les packages Lambda
+
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues:
+      - dev
+      - prod
+    Description: Environnement de déploiement
+
+Resources:
+  # ===== DYNAMODB TABLES =====
+
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'SmartDoc_Users_${Environment}'
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: Project
+          Value: SmartDoc
+        - Key: Environment
+          Value: !Ref Environment
+
+  MedicationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'SmartDoc_Medications_${Environment}'
+      AttributeDefinitions:
+        - AttributeName: medication_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: medication_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: UserIdIndex
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: Project
+          Value: SmartDoc
+
+  AppointmentsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'SmartDoc_Appointments_${Environment}'
+      AttributeDefinitions:
+        - AttributeName: appointment_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: appointment_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: UserIdIndex
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: Project
+          Value: SmartDoc
+
+  ConversationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'SmartDoc_Conversations_${Environment}'
+      AttributeDefinitions:
+        - AttributeName: conversation_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: conversation_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: UserIdIndex
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: Project
+          Value: SmartDoc
+
+  EmergenciesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'SmartDoc_Emergencies_${Environment}'
+      AttributeDefinitions:
+        - AttributeName: emergency_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: emergency_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: UserIdIndex
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: Project
+          Value: SmartDoc
+
+  # ===== IAM ROLES =====
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'SmartDoc-Lambda-Role-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:UpdateItem
+                Resource:
+                  - !GetAtt UsersTable.Arn
+                  - !GetAtt MedicationsTable.Arn
+                  - !GetAtt AppointmentsTable.Arn
+                  - !GetAtt ConversationsTable.Arn
+                  - !GetAtt EmergenciesTable.Arn
+                  - !Sub '${UsersTable.Arn}/index/*'
+                  - !Sub '${MedicationsTable.Arn}/index/*'
+                  - !Sub '${AppointmentsTable.Arn}/index/*'
+                  - !Sub '${ConversationsTable.Arn}/index/*'
+                  - !Sub '${EmergenciesTable.Arn}/index/*'
+        - PolicyName: SNSPublish
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: '*'
+        - PolicyName: LambdaInvoke
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:smartdoc-*'
+
+  # ===== LAMBDA FUNCTIONS =====
+
+  OrchestratorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'smartdoc-orchestrator-${Environment}'
+      Runtime: python3.11
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: !Ref DeploymentBucket
+        S3Key: orchestrator.zip
+      Timeout: 60
+      MemorySize: 512
+      Environment:
+        Variables:
+          ANTHROPIC_API_KEY: !Ref AnthropicApiKey
+          ENVIRONMENT: !Ref Environment
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Tags:
+        - Key: Project
+          Value: SmartDoc
+        - Key: Agent
+          Value: Orchestrator
+
+  MedicationAgentFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'smartdoc-medication-agent-${Environment}'
+      Runtime: python3.11
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: !Ref DeploymentBucket
+        S3Key: medication-agent.zip
+      Timeout: 60
+      MemorySize: 512
+      Environment:
+        Variables:
+          ANTHROPIC_API_KEY: !Ref AnthropicApiKey
+          ENVIRONMENT: !Ref Environment
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Tags:
+        - Key: Project
+          Value: SmartDoc
+        - Key: Agent
+          Value: Medication
+
+  SymptomAgentFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'smartdoc-symptom-agent-${Environment}'
+      Runtime: python3.11
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: !Ref DeploymentBucket
+        S3Key: symptom-agent.zip
+      Timeout: 60
+      MemorySize: 512
+      Environment:
+        Variables:
+          ANTHROPIC_API_KEY: !Ref AnthropicApiKey
+          ENVIRONMENT: !Ref Environment
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Tags:
+        - Key: Project
+          Value: SmartDoc
+        - Key: Agent
+          Value: Symptom
+
+  EmergencyAgentFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'smartdoc-emergency-agent-${Environment}'
+      Runtime: python3.11
+      Handler: handler.lambda_handler
+      Code:
+        S3Bucket: !Ref DeploymentBucket
+        S3Key: emergency-agent.zip
+      Timeout: 60
+      MemorySize: 512
+      Environment:
+        Variables:
+          ANTHROPIC_API_KEY: !Ref AnthropicApiKey
+          ENVIRONMENT: !Ref Environment
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Tags:
+        - Key: Project
+          Value: SmartDoc
+        - Key: Agent
+          Value: Emergency
+
+  # ===== API GATEWAY =====
+
+  SmartDocApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub 'SmartDoc-API-${Environment}'
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins:
+          - '*'
+        AllowMethods:
+          - POST
+          - GET
+          - OPTIONS
+        AllowHeaders:
+          - '*'
+        MaxAge: 300
+
+  ApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref SmartDocApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt OrchestratorFunction.Arn
+      PayloadFormatVersion: '2.0'
+
+  ChatRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref SmartDocApi
+      RouteKey: 'POST /chat'
+      Target: !Sub 'integrations/${ApiIntegration}'
+
+  ApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref SmartDocApi
+      StageName: '$default'
+      AutoDeploy: true
+
+  ApiGatewayInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref OrchestratorFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${SmartDocApi}/*'
+
+  # ===== EVENTBRIDGE POUR RAPPELS =====
+
+  MedicationReminderRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub 'SmartDoc-Medication-Reminders-${Environment}'
+      Description: Déclenche des rappels de médicaments toutes les heures
+      ScheduleExpression: 'cron(0 * * * ? *)'
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt MedicationAgentFunction.Arn
+          Id: MedicationReminderTarget
+
+  MedicationReminderPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref MedicationAgentFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt MedicationReminderRule.Arn
+
+  # ===== CLOUDWATCH LOG GROUPS =====
+
+  OrchestratorLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/smartdoc-orchestrator-${Environment}'
+      RetentionInDays: 7
+
+  MedicationAgentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/smartdoc-medication-agent-${Environment}'
+      RetentionInDays: 7
+
+  SymptomAgentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/smartdoc-symptom-agent-${Environment}'
+      RetentionInDays: 7
+
+  EmergencyAgentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/smartdoc-emergency-agent-${Environment}'
+      RetentionInDays: 7
+
+Outputs:
+  ApiUrl:
+    Description: URL de l'API SmartDoc
+    Value: !GetAtt SmartDocApi.ApiEndpoint
+    Export:
+      Name: !Sub '${AWS::StackName}-ApiUrl'
+
+  ApiId:
+    Description: ID de l'API Gateway
+    Value: !Ref SmartDocApi
+
+  UsersTableName:
+    Description: Nom de la table Users
+    Value: !Ref UsersTable
+
+  MedicationsTableName:
+    Description: Nom de la table Medications
+    Value: !Ref MedicationsTable
+
+  AppointmentsTableName:
+    Description: Nom de la table Appointments
+    Value: !Ref AppointmentsTable
+
+  OrchestratorFunctionArn:
+    Description: ARN de la fonction Orchestrator
+    Value: !GetAtt OrchestratorFunction.Arn
+
+  MedicationAgentFunctionArn:
+    Description: ARN de la fonction Medication Agent
+    Value: !GetAtt MedicationAgentFunction.Arn
+
+  SymptomAgentFunctionArn:
+    Description: ARN de la fonction Symptom Agent
+    Value: !GetAtt SymptomAgentFunction.Arn
+
+  EmergencyAgentFunctionArn:
+    Description: ARN de la fonction Emergency Agent
+    Value: !GetAtt EmergencyAgentFunction.Arn

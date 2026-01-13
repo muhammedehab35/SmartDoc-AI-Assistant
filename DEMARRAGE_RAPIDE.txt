@@ -1,0 +1,159 @@
+================================================================================
+    SMARTDOC ASSISTANT - GUIDE DE DEMARRAGE RAPIDE
+    Par Muhammad Ehab
+================================================================================
+
+ETAPE 1: INSTALLATION (Une seule fois)
+----------------------------------------
+
+1. Creer l'environnement virtuel:
+   python -m venv env
+
+2. Installer les dependances:
+   env\Scripts\pip install -r requirements.txt
+
+3. Configurer la cle API:
+   - Copier .env.example vers .env
+   - Editer .env et mettre votre cle Anthropic:
+     ANTHROPIC_API_KEY=sk-ant-api03-VOTRE_CLE_ICI
+
+
+ETAPE 2: DEMARRER LE SERVEUR
+-----------------------------
+
+Option A - Script automatique (RECOMMANDE):
+   start.bat
+
+Option B - Manuel:
+   1. Ouvrir un terminal
+   2. Executer: set ANTHROPIC_API_KEY=
+   3. Executer: env\Scripts\python.exe demo_server.py 3000
+
+
+ETAPE 3: UTILISER L'APPLICATION
+--------------------------------
+
+1. Le serveur demarre sur http://localhost:3000
+
+2. Ouvrir frontend\index.html dans votre navigateur
+
+3. Cliquer sur l'icone parametres (engrenage en haut a droite)
+
+4. Configurer:
+   - URL API: http://localhost:3000
+   - User ID: user_muhammad_ehab
+
+5. Sauvegarder et commencer a discuter!
+
+
+EXEMPLES DE MESSAGES
+---------------------
+
+Conversation generale:
+  - Bonjour, comment vas-tu?
+  - Qui es-tu?
+  - Merci pour ton aide
+
+Medicaments:
+  - Quels medicaments dois-je prendre?
+  - A quelle heure mes medicaments?
+
+Symptomes:
+  - J'ai mal a la tete
+  - Je me sens fatigue
+
+Urgences:
+  - Aide! C'est urgent
+  - Urgence medicale
+
+
+TESTS RAPIDES
+-------------
+
+Tester la cle API:
+   env\Scripts\python.exe test_api_key.py
+
+Test complet:
+   set ANTHROPIC_API_KEY= && env\Scripts\python.exe test_langgraph.py
+
+
+PROBLEMES COURANTS
+------------------
+
+Erreur 401 (cle API invalide):
+   1. Verifier que .env contient votre vraie cle
+   2. Executer: set ANTHROPIC_API_KEY=
+   3. Relancer le serveur
+
+Port 3000 occupe:
+   python demo_server.py 8080
+
+Module non trouve:
+   env\Scripts\pip install -r requirements.txt
+
+
+STATUT DU SYSTEME
+-----------------
+
+ACTUELLEMENT FONCTIONNEL:
+  [OK] Claude AI (claude-3-haiku-20240307)
+  [OK] Classification automatique des intentions
+  [OK] Reponses contextuelles adaptees
+  [OK] API REST locale
+  [OK] Interface web moderne
+
+EN DEVELOPPEMENT:
+  [ ] Multi-agents LangGraph complets
+  [ ] Base de donnees DynamoDB
+  [ ] Notifications SMS
+  [ ] Deploiement AWS
+
+
+ARCHITECTURE
+------------
+
+Frontend (HTML/CSS/JS)
+    |
+    v
+API Server (demo_server.py)
+    |
+    v
+Claude AI (Anthropic)
+    |
+    v
+Classification + Reponses
+
+
+FICHIERS IMPORTANTS
+-------------------
+
+start.bat              - Script de demarrage Windows
+demo_server.py         - Serveur API local
+frontend/index.html    - Interface web
+.env                   - Configuration (cle API)
+requirements.txt       - Dependances Python
+GUIDE_DEMARRAGE.md     - Documentation complete
+README_SIMPLE.md       - README court
+
+
+DOCUMENTATION COMPLETE
+----------------------
+
+Pour plus de details, voir:
+  - GUIDE_DEMARRAGE.md (guide complet)
+  - README_SIMPLE.md (readme court)
+  - ARCHITECTURE.md (architecture technique)
+
+
+SUPPORT
+-------
+
+En cas de probleme:
+  1. Verifier que l'environnement virtuel est active
+  2. Verifier que .env existe et contient la bonne cle
+  3. Consulter GUIDE_DEMARRAGE.md section Depannage
+
+
+================================================================================
+Pret a demarrer? Executez: start.bat
+================================================================================

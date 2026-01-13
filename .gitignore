@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Lambda packages
+*.zip
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# AWS
+.aws-sam/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+temp/
+tmp/
+
+# Secrets
+*secret*
+*password*
+*credentials*
+*.pem
+*.key
+
+# Node modules (si vous utilisez npm)
+node_modules/
+
+# Coverage
+.coverage
+htmlcov/
+
+# pytest
+.pytest_cache/

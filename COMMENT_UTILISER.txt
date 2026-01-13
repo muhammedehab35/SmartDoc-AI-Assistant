@@ -1,0 +1,81 @@
+================================================================================
+                   COMMENT UTILISER SMARTDOC ASSISTANT
+                          Guide Ultra-Simple
+================================================================================
+
+POUR DEMARRER EN 30 SECONDES:
+------------------------------
+
+1. Double-cliquer sur: start.bat
+
+2. Ouvrir dans le navigateur: frontend\index.html
+
+3. Cliquer sur icone parametres (engrenage)
+
+4. Entrer:
+   - URL: http://localhost:3000
+   - User ID: user_muhammad_ehab
+
+5. Cliquer "Sauvegarder"
+
+6. Commencer a discuter!
+
+
+C'EST TOUT! Le systeme fonctionne!
+
+
+EXEMPLES DE MESSAGES A TESTER:
+-------------------------------
+
+"Bonjour"
+"J'ai mal a la tete"
+"Quels medicaments dois-je prendre?"
+"Aide! C'est urgent"
+
+
+SI CA NE FONCTIONNE PAS:
+------------------------
+
+Probleme 1: "start.bat" ne marche pas
+Solution: 
+  1. Ouvrir terminal (cmd)
+  2. Taper: set ANTHROPIC_API_KEY=
+  3. Taper: env\Scripts\python.exe demo_server.py 3000
+
+Probleme 2: Erreur 401
+Solution: Verifier que .env contient votre vraie cle API
+
+Probleme 3: Port 3000 occupe
+Solution: python demo_server.py 8080
+
+
+VERIFIER QUE CA FONCTIONNE:
+---------------------------
+
+Test 1: Verifier serveur
+  Ouvrir: http://localhost:3000/health
+  Doit afficher: {"status": "ok", "service": "SmartDoc Assistant"}
+
+Test 2: Verifier Claude AI
+  Terminal: env\Scripts\python.exe test_api_key.py
+  Doit afficher: SUCCES!
+
+
+FICHIERS IMPORTANTS:
+--------------------
+
+start.bat              <- DEMARRER ICI
+demo_server.py         <- Serveur API
+frontend/index.html    <- Interface web
+.env                   <- Configuration
+GUIDE_DEMARRAGE.md     <- Documentation complete
+
+
+AIDE:
+-----
+
+Voir documentation complete: GUIDE_DEMARRAGE.md
+Voir resume projet: RESUME_PROJET.md
+
+
+================================================================================

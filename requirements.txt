@@ -1,0 +1,26 @@
+# SmartDoc Assistant - Dependencies
+# Python 3.9+
+
+# ===== CORE AI & ML =====
+anthropic>=0.39.0
+langchain>=0.3.0
+langchain-anthropic>=0.3.0
+langchain-core>=0.3.0
+langgraph>=0.2.0
+
+# ===== AWS SDK (pour deploiement futur) =====
+boto3>=1.26.0
+botocore>=1.29.0
+
+# ===== UTILITIES =====
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+
+# ===== HTTP & API =====
+requests>=2.31.0
+
+# ===== DATA PROCESSING =====
+# (ajoutez selon vos besoins)
+
+# ===== DEVELOPMENT & TESTING =====
+# pytest>=7.4.0  # Décommentez pour tests unitaires
