@@ -79,26 +79,6 @@
 
 ---
 
-## 🚀 Quick Demo
-
-### Example Conversations
-
-```
-👤 User: "Hello, how are you?"
-🤖 Bot: "Hello Muhammad! I'm glad to meet you. How can I help you today?"
-
-👤 User: "I have a headache"
-🤖 Bot: "I understand you have a headache. Please consult your doctor.
-       Meanwhile, rest and drink water..."
-
-👤 User: "What medications should I take?"
-🤖 Bot: "I cannot advise specifically on medications. Please contact
-       your doctor for personalized medical advice..."
-
-👤 User: "Medical emergency!"
-🤖 Bot: "This is an emergency! Call 15 (SAMU) immediately.
-       Don't stay alone..."
-```
 
 ---
 
